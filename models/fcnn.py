@@ -9,7 +9,8 @@ def build_fcnn(
     layers_sizes,
     activation,
     activation_derivative,
-    data,
+    X_train,
+    y_train,
     batch_size,
     epochs_count=250,
     on_epoch_end=lambda epoch_number, learning_time, model: None,
@@ -65,6 +66,7 @@ def build_fcnn(
                 np.sum(layer_delta_ls, axis=1, keepdims=True) / batch_size
             )
 
+    data = list(zip(X_train, y_train))
 
     def gradient_descent():
         for epoch_number in range(epochs_count):
@@ -100,7 +102,6 @@ def sigmoid_derivative(z):
 def main():
     data = datasets.load_digits()
 
-    # NOTE: how does this work?
     data.target = np.eye(10)[data.target]
 
     X_train, X_test, y_train, y_test = train_test_split(
@@ -109,8 +110,6 @@ def main():
         test_size=0.3,
         shuffle=False,
     )
-
-    pixels_count = data.images.shape[1] * data.images.shape[2]
 
     def evaluate_accuracy(model):
         model_outputs = model(X_test).T
@@ -121,6 +120,7 @@ def main():
             0,
         ) / len(X_test)
 
+    pixels_count = data.images.shape[1] * data.images.shape[2]
     model = build_fcnn(
         layers_sizes=[
             pixels_count,
@@ -130,7 +130,8 @@ def main():
         ],
         activation=sigmoid,
         activation_derivative=sigmoid_derivative,
-        data=list(zip(X_train, y_train)),
+        X_train=X_train,
+        y_train=y_train,
         batch_size=8,
         on_epoch_end=lambda epoch_number, learning_time, model: print(
             f"Epoch {epoch_number} finished in {learning_time} with accuracy: {evaluate_accuracy(model)}"
