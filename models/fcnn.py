@@ -22,7 +22,7 @@ def build_fcnn(
     ]
     biases = [np.random.randn(layer_size, 1) for layer_size in layers_sizes[1:]]
 
-    forward_pass_batch_activations = []
+    forward_pass_batch_activations = None
 
     def feedforward(batch):
         nonlocal weights, biases, forward_pass_batch_activations
@@ -68,6 +68,9 @@ def build_fcnn(
 
     data = list(zip(X_train, y_train))
 
+    def model(X):
+        return feedforward(X).T
+
     def gradient_descent():
         for epoch_number in range(epochs_count):
             np.random.shuffle(data)
@@ -83,14 +86,13 @@ def build_fcnn(
                 outputs = feedforward(X)
                 backprop(X, outputs, y)
 
-            on_epoch_end(epoch_number, perf_counter() - start_time, feedforward)
+            on_epoch_end(epoch_number, perf_counter() - start_time, model)
 
     gradient_descent()
 
-    return feedforward
+    return model
 
 
-# must accept an primitive number or a numpy array of numbers
 def sigmoid(z):
     return 1 / (1 + np.exp(-z))
 
@@ -112,7 +114,7 @@ def main():
     )
 
     def evaluate_accuracy(model):
-        model_outputs = model(X_test).T
+        model_outputs = model(X_test)
 
         return reduce(
             lambda correct_count, outputs: correct_count + (np.argmax(outputs[0]) == np.argmax(outputs[1])),
