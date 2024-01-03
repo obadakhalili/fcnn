@@ -101,6 +101,15 @@ def sigmoid_derivative(z):
     sigmoid_given_z = sigmoid(z)
     return sigmoid_given_z * (1 - sigmoid_given_z)
 
+
+def tanh(z):
+    return np.tanh(z)
+
+
+def tanh_derivative(z):
+    return 1 - np.tanh(z) ** 2
+
+
 def main():
     data = datasets.load_digits()
 
@@ -130,8 +139,8 @@ def main():
             50,
             10,
         ],
-        activation=sigmoid,
-        activation_derivative=sigmoid_derivative,
+        activation=tanh,
+        activation_derivative=tanh_derivative,
         X_train=X_train,
         y_train=y_train,
         batch_size=8,
