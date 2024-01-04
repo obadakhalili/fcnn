@@ -8,8 +8,8 @@ def build_fcnn(
     layers_sizes,
     activation,
     activation_derivative,
-    X_train,
-    y_train,
+    X,
+    y,
     batch_size,
     epochs_count=250,
     on_epoch_end=lambda epoch_number, learning_time, model: None,
@@ -70,7 +70,7 @@ def build_fcnn(
 
     def gradient_descent():
         for epoch_number in range(epochs_count):
-            batches_indices = np.arange(len(X_train))
+            batches_indices = np.arange(len(X))
             np.random.shuffle(batches_indices)
 
             start_time = perf_counter()
@@ -79,10 +79,10 @@ def build_fcnn(
                 batches_indices[batch_idx : batch_idx + batch_size]
                 for batch_idx in range(0, len(batches_indices), batch_size)
             ]:
-                X = X_train[batch_indices]
-                y = y_train[batch_indices]
-                outputs = feedforward(X)
-                backprop(X, outputs, y)
+                X_batch = X[batch_indices]
+                y_batch = y[batch_indices]
+                outputs = feedforward(X_batch)
+                backprop(X_batch, outputs, y_batch)
 
             on_epoch_end(epoch_number, perf_counter() - start_time, model)
 
@@ -145,8 +145,8 @@ def main():
         ],
         activation=tanh,
         activation_derivative=tanh_derivative,
-        X_train=X_train,
-        y_train=y_train,
+        X=X_train,
+        y=y_train,
         batch_size=64,
         epochs_count=10,
         on_epoch_end=lambda epoch_number, learning_time, model: print(
