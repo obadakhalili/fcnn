@@ -66,23 +66,22 @@ def build_fcnn(
                 np.sum(layer_delta_ls, axis=1, keepdims=True) / batch_size
             )
 
-    data = list(zip(X_train, y_train))
-
     def model(X):
         return feedforward(X).T
 
     def gradient_descent():
         for epoch_number in range(epochs_count):
-            np.random.shuffle(data)
+            batches_indices = np.arange(len(X_train))
+            np.random.shuffle(batches_indices)
+
             start_time = perf_counter()
 
-            for batch in [
-                data[batch_idx : batch_idx + batch_size]
-                for batch_idx in range(0, len(data), batch_size)
+            for batch_indices in [
+                batches_indices[batch_idx : batch_idx + batch_size]
+                for batch_idx in range(0, len(batches_indices), batch_size)
             ]:
-                X = np.array([sample[0] for sample in batch])
-                y = np.array([sample[1] for sample in batch])
-
+                X = X_train[batch_indices]
+                y = y_train[batch_indices]
                 outputs = feedforward(X)
                 backprop(X, outputs, y)
 
