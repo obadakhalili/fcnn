@@ -4,6 +4,9 @@ from mnist import MNIST
 import numpy as np
 
 
+np.random.seed(42)
+
+
 def build_fcnn(
     layers_sizes,
     activation,
@@ -143,6 +146,7 @@ def main():
         X=X_train,
         y=y_train,
         batch_size=64,
+        epochs_count=4,
         on_epoch_end=lambda epoch_number, learning_time, model: print(
             f"Epoch {epoch_number} finished in {learning_time} with test accuracy: {evaluate_accuracy(model)}"
         ),
