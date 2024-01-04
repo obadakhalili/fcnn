@@ -1,8 +1,7 @@
-import numpy as np
-from sklearn import datasets
-from sklearn.model_selection import train_test_split
 from time import perf_counter
 from functools import reduce
+from mnist import MNIST
+import numpy as np
 
 
 def build_fcnn(
@@ -109,17 +108,23 @@ def tanh_derivative(z):
     return 1 - np.tanh(z) ** 2
 
 
+def fetch_mnist():
+    mndata = MNIST("data")
+    mndata.gz = True
+    mndata.load_training()
+    mndata.load_testing()
+
+    X_train = np.array(mndata.train_images)
+    y_train = np.array(mndata.train_labels)
+    X_test = np.array(mndata.test_images)
+    y_test = np.array(mndata.test_labels)
+
+    return X_train, y_train, X_test, y_test
+
+
 def main():
-    data = datasets.load_digits()
-
-    data.target = np.eye(10)[data.target]
-
-    X_train, X_test, y_train, y_test = train_test_split(
-        data.images.reshape((data.images.shape[0], -1)),
-        data.target,
-        test_size=0.3,
-        shuffle=False,
-    )
+    print("Fetching MNIST data...")
+    X_train, y_train, X_test, y_test = fetch_mnist()
 
     def evaluate_accuracy(model):
         model_outputs = model(X_test)
@@ -130,7 +135,7 @@ def main():
             0,
         ) / len(X_test)
 
-    pixels_count = data.images.shape[1] * data.images.shape[2]
+    pixels_count = X_train.shape[1]
     model = build_fcnn(
         layers_sizes=[
             pixels_count,
@@ -142,13 +147,14 @@ def main():
         activation_derivative=tanh_derivative,
         X_train=X_train,
         y_train=y_train,
-        batch_size=8,
+        batch_size=64,
+        epochs_count=10,
         on_epoch_end=lambda epoch_number, learning_time, model: print(
-            f"Epoch {epoch_number} finished in {learning_time} with accuracy: {evaluate_accuracy(model)}"
+            f"Epoch {epoch_number} finished in {learning_time} with test accuracy: {evaluate_accuracy(model)}"
         ),
     )
 
-    print(f"Final accuracy: {evaluate_accuracy(model)}")
+    print(f"Final test accuracy: {evaluate_accuracy(model)}")
 
 
 if __name__ == "__main__":
