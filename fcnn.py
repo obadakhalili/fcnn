@@ -70,20 +70,15 @@ def build_fcnn(
 
     def gradient_descent():
         for epoch_number in range(epochs_count):
-            batches_indices = np.arange(len(X))
-            np.random.shuffle(batches_indices)
+            batch_indices = np.arange(batch_size)
+            np.random.shuffle(batch_indices)
+
+            X_batch = X[batch_indices]
+            y_batch = y[batch_indices]
 
             start_time = perf_counter()
-
-            for batch_indices in [
-                batches_indices[batch_idx : batch_idx + batch_size]
-                for batch_idx in range(0, len(batches_indices), batch_size)
-            ]:
-                X_batch = X[batch_indices]
-                y_batch = y[batch_indices]
-                outputs = feedforward(X_batch)
-                backprop(X_batch, outputs, y_batch)
-
+            outputs = feedforward(X_batch)
+            backprop(X_batch, outputs, y_batch)
             on_epoch_end(epoch_number, perf_counter() - start_time, model)
 
     gradient_descent()
@@ -148,7 +143,6 @@ def main():
         X=X_train,
         y=y_train,
         batch_size=64,
-        epochs_count=10,
         on_epoch_end=lambda epoch_number, learning_time, model: print(
             f"Epoch {epoch_number} finished in {learning_time} with test accuracy: {evaluate_accuracy(model)}"
         ),
